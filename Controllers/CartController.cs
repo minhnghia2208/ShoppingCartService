@@ -4,6 +4,7 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ShoppingCartService.Model;
+using System.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,6 +14,9 @@ namespace ShoppingCartService.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
+        string ABSconnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ABS"].ConnectionString;
+        string QueueConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["Queue"].ConnectionString;
+
         // GET: api/<CartController>
         [HttpGet]
         public async Task<IEnumerable<string>> Get()
@@ -27,8 +31,8 @@ namespace ShoppingCartService.Controllers
             {
                 TransportType = ServiceBusTransportType.AmqpWebSockets
             };
-            client = new ServiceBusClient("Endpoint=sb://daprentity.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=iGY15mccd2kyP58QI+c/2y+ttvUS8vS4TVWdokZQOIc=", clientOptions);
-            sender = client.CreateSender("order");
+            client = new ServiceBusClient(ABSconnectionString, clientOptions);
+            sender = client.CreateSender(QueueConnectionString);
 
             // create a batch 
             using ServiceBusMessageBatch messageBatch = await sender.CreateMessageBatchAsync();
